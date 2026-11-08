@@ -45,10 +45,23 @@ jobs:
           sdkmanager --version
           adb version
           bash ./gradlew --version
+          JAVA_LINE="$(java -version 2>&1 | head -n 1)"
+          SDK_LINE="$(sdkmanager --version)"
+          GRADLE_LINE="$(bash ./gradlew --version | awk '/^Gradle / { print; exit }')"
+          printf '::notice title=Android tool versions::%s; sdkmanager %s; %s\n' "$JAVA_LINE" "$SDK_LINE" "$GRADLE_LINE"
 
       - name: Run unit tests and assemble debug APK
         working-directory: client
         run: bash ./gradlew testDebugUnitTest assembleDebug --no-daemon --stacktrace
+
+      - name: Summarize unit test results
+        run: |
+          python3 - <<'PY'
+          import glob, xml.etree.ElementTree as ET
+          suites = [ET.parse(path).getroot() for path in glob.glob('client/app/build/test-results/testDebugUnitTest/**/*.xml', recursive=True)]
+          totals = {key: sum(int(suite.attrib.get(key, 0)) for suite in suites) for key in ('tests', 'failures', 'errors', 'skipped')}
+          print('::notice title=Android unit tests::' + ', '.join(f'{key}={value}' for key, value in totals.items()) + f', suites={len(suites)}')
+          PY
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
@@ -103,6 +116,16 @@ jobs:
           target: google_apis
           script: cd client && bash ./gradlew connectedDebugAndroidTest --no-daemon --stacktrace
 
+      - name: Summarize instrumented test results
+        run: |
+          python3 - <<'PY'
+          import glob, xml.etree.ElementTree as ET
+          paths = glob.glob('client/app/build/outputs/androidTest-results/connected/**/*.xml', recursive=True)
+          suites = [ET.parse(path).getroot() for path in paths]
+          totals = {key: sum(int(suite.attrib.get(key, 0)) for suite in suites) for key in ('tests', 'failures', 'errors', 'skipped')}
+          print('::notice title=Android instrumented tests::' + ', '.join(f'{key}={value}' for key, value in totals.items()) + f', suites={len(suites)}')
+          PY
+
       - name: Upload instrumented test reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -147,6 +170,11 @@ jobs:
           pkg-config --modversion asio
           wx-config --version
           adb version
+          CMAKE_LINE="$(cmake --version | head -n 1)"
+          CXX_LINE="$(c++ --version | head -n 1)"
+          ASIO_VERSION="$(pkg-config --modversion asio)"
+          WX_VERSION="$(wx-config --version)"
+          printf '::notice title=Linux tool versions::%s; %s; wxWidgets %s; Asio %s\n' "$CMAKE_LINE" "$CXX_LINE" "$WX_VERSION" "$ASIO_VERSION"
 
       - name: Configure server
         run: cmake -S server -B build/server-linux -G Ninja -DCMAKE_BUILD_TYPE=Release
@@ -186,9 +214,13 @@ jobs:
       - name: Record compiler and CMake versions
         shell: pwsh
         run: |
-          cmake --version
-          & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -property installationVersion
-          vcpkg version
+          $cmakeLine = (cmake --version | Select-Object -First 1)
+          $vsVersion = (& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -property installationVersion)
+          $vcpkgLine = (vcpkg version | Select-Object -First 1)
+          Write-Output $cmakeLine
+          Write-Output "Visual Studio $vsVersion"
+          Write-Output $vcpkgLine
+          Write-Host "::notice title=Windows tool versions::$cmakeLine; Visual Studio $vsVersion; $vcpkgLine"
 
       - name: Install declared vcpkg dependencies
         shell: pwsh
@@ -202,7 +234,23 @@ jobs:
 
       - name: Compile server
         shell: pwsh
-        run: cmake --build build/server-windows --config Release --parallel 2 --verbose
+        run: |
+          & cmake --build build/server-windows --config Release --parallel 2 --verbose 2>&1 | Tee-Object -FilePath windows-compile.log
+          $buildExit = $LASTEXITCODE
+          if ($buildExit -ne 0) {
+            Select-String -Path windows-compile.log -Pattern 'error C[0-9]+|error LNK[0-9]+|error:|FAILED:' | Select-Object -First 40 | ForEach-Object {
+              Write-Host "::error::$($_.Line)"
+            }
+            exit $buildExit
+          }
+
+      - name: Upload Windows compile log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-compile-log
+          path: D:/a/mousedroid-work/windows-compile.log
+          if-no-files-found: ignore
 
       - name: Run registered C++ tests
         shell: pwsh
