@@ -26,10 +26,7 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install required Android packages
+      - name: Install required Android packages in the preinstalled runner SDK
         run: |
           sdkmanager --install 'platforms;android-34' 'build-tools;35.0.0' 'platform-tools'
 
@@ -128,8 +125,14 @@ jobs:
   server-windows:
     name: Windows C++ server
     runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: work
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out into a Windows-safe path (repository name ends in a dot)
+        uses: actions/checkout@v4
+        with:
+          path: work
 
       - name: Record compiler and CMake versions
         shell: pwsh
@@ -160,5 +163,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mousedroid-windows-server
-          path: build/server-windows/bin/Release/Mousedroid.exe
+          path: work/build/server-windows/bin/Release/Mousedroid.exe
           if-no-files-found: error
