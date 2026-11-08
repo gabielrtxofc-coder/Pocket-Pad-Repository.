@@ -26,9 +26,10 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Install required Android packages in the preinstalled runner SDK
-        run: |
-          sdkmanager --install 'platforms;android-34' 'build-tools;35.0.0' 'platform-tools'
+      - name: Set up Android SDK and required packages
+        uses: android-actions/setup-android@v4.0.4
+        with:
+          packages: 'platforms;android-34 build-tools;35.0.0 platform-tools'
 
       - name: Override machine-specific SDK path only in this runner
         working-directory: client
@@ -127,12 +128,14 @@ jobs:
     runs-on: windows-latest
     defaults:
       run:
-        working-directory: work
+        working-directory: D:\a\mousedroid-work
     steps:
-      - name: Check out into a Windows-safe path (repository name ends in a dot)
-        uses: actions/checkout@v4
-        with:
-          path: work
+      # actions/checkout rejects the repository's default path because its name
+      # ends in a dot. Clone this public repository into a Windows-safe path.
+      - name: Check out into a Windows-safe path
+        shell: pwsh
+        working-directory: D:\a
+        run: git clone --depth 1 --branch "${{ github.ref_name }}" "https://github.com/${{ github.repository }}.git" D:\a\mousedroid-work
 
       - name: Record compiler and CMake versions
         shell: pwsh
@@ -163,5 +166,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mousedroid-windows-server
-          path: work/build/server-windows/bin/Release/Mousedroid.exe
+          path: D:/a/mousedroid-work/build/server-windows/bin/Release/Mousedroid.exe
           if-no-files-found: error
