@@ -4,7 +4,7 @@
 > **Branch:** `arena/c39918ee-pocket-pad-repository` (criada de `main` @ `8b796fa`)
 > **PR:** [#6](https://github.com/gabielrtxofc-coder/Pocket-Pad-Repository./pull/6) → `main`
 > **Data:** 2026-11-09 (UTC) · **Execução:** sessão autônoma única
-> Verificação pré-merge concluída. Merge e validação pós-merge preenchidos na última seção.
+> **Status: MISSAO CONCLUÍDA — merge realizado e main validada.**
 
 ---
 
@@ -266,11 +266,27 @@ Detalhe: [`OPEN-QUESTIONS.md`](OPEN-QUESTIONS.md).
 |---|---|
 | PR revisado e `MERGEABLE` | ✅ |
 | CI verde no PR (4/4 jobs) | ✅ `42596286394` / `42607502150` |
-| Merge por **Create a merge commit** | ✅ **executado** |
-| Hash do merge commit | `MERGE_SHA` |
-| Novo HEAD da `main` | `MAIN_HEAD` |
-| CI automático na `main` pós-merge | preenchido abaixo |
-| Validação pós-merge | preenchido abaixo |
+| Merge por **Create a merge commit** | ✅ **executado** em 2026-11-09T11:46:09Z |
+| Hash do merge commit | **`53a22500a81eb81c35f20b711e08b1b7fbe051fc`** |
+| Novo HEAD da `main` | **`53a2250`** (anterior: `8b796fa`) |
+| CI automático na `main` pós-merge | ✅ **disparado** — run `42611635394` (`push`, `53a2250`) |
+| Validação pós-merge | ✅ **4/4 jobs verdes** na `main` |
+
+### 6.1 Validação pós-merge (`main` @ `53a2250`) — tarefa 200
+
+| Job | Resultado |
+|---|---|
+| Android unit tests and debug APK | ✅ success |
+| Android instrumented test on API 34 | ✅ success |
+| Linux C++ server | ✅ success |
+| Windows C++ server | ✅ success |
+
+**A `main` compila nos três alvos depois da limpeza.** Verificado também na árvore:
+
+- `origin/main` tem **215 arquivos** rastreados (210 de projeto + 5 documentos de fechamento);
+- os 17 arquivos removidos **estão ausentes** na `main` (verificado por caminho exato);
+- `git log --oneline -1 origin/main` → `53a2250 Missão 04 — limpeza controlada e consolidação estrutural do Pocket Pad`;
+- todos os 9 commits da branch estão preservados no histórico da `main` (merge commit, não squash).
 
 ---
 
