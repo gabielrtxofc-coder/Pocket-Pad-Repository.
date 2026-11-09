@@ -1,4 +1,5 @@
 #include "wxmain.h"
+#include "net/server.h"
 
 #include "../res/icon.xpm"
 
