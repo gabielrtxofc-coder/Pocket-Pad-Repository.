@@ -13,9 +13,20 @@
 namespace adb
 {
 	/*
+	* Device status enumeration
+	*/
+	enum class DeviceStatus {
+		NONE,           // No devices connected
+		UNAUTHORIZED,   // Device connected but not authorized
+		OFFLINE,        // Device offline
+		CONNECTED,      // At least one device connected and authorized
+		MULTIPLE        // Multiple devices connected
+	};
+
+	/*
 	* Get the local directory of the program
 	*/
-	std::string dir()
+	inline std::string dir()
 	{
 		char buffer[MAX_PATH];
 		GetModuleFileNameA(NULL, buffer, MAX_PATH);
@@ -27,7 +38,7 @@ namespace adb
 	/*
 	* Get the full path to adb.exe
 	*/
-	std::string adbPath()
+	inline std::string adbPath()
 	{
 		return dir() + "\\adb.exe";
 	}
@@ -36,11 +47,10 @@ namespace adb
 	* Execute an adb command and capture output.
 	* Returns the exit code. Output is stored in the output parameter.
 	*/
-	int exec(const std::string& args, std::string& output)
+	inline int exec(const std::string& args, std::string& output)
 	{
 		std::string command = "\"" + adbPath() + "\" " + args + " 2>&1";
 		
-		// Use a temporary file to capture output (popen approach)
 		output.clear();
 		
 		FILE* pipe = _popen(command.c_str(), "r");
@@ -58,28 +68,17 @@ namespace adb
 	* Execute an adb command without capturing output.
 	* Returns the exit code.
 	*/
-	int execSimple(const std::string& args)
+	inline int execSimple(const std::string& args)
 	{
 		std::string command = "\"" + adbPath() + "\" " + args + " 2>nul";
 		return system(command.c_str());
 	}
 
 	/*
-	* Device status enumeration
-	*/
-	enum class DeviceStatus {
-		NONE,           // No devices connected
-		UNAUTHORIZED,   // Device connected but not authorized
-		OFFLINE,        // Device offline
-		CONNECTED,      // At least one device connected and authorized
-		MULTIPLE        // Multiple devices connected
-	};
-
-	/*
 	* Check connected devices by parsing "adb devices" output.
 	* Returns the overall status.
 	*/
-	DeviceStatus checkDevices()
+	inline DeviceStatus checkDevices()
 	{
 		std::string output;
 		int result = exec("devices", output);
@@ -156,7 +155,7 @@ namespace adb
 	/*
 	* Get a human-readable status message for the device status.
 	*/
-	std::string statusMessage(DeviceStatus status)
+	inline std::string statusMessage(DeviceStatus status)
 	{
 		switch (status) {
 			case DeviceStatus::NONE:
@@ -179,7 +178,7 @@ namespace adb
 	* adb reverse tcp:<port> tcp:<port>
 	* Returns true if successful.
 	*/
-	bool start(int port)
+	inline bool start(int port)
 	{
 		std::string path = adbPath();
 		std::string command = "\"" + path + "\" reverse tcp:" + std::to_string(port) + " tcp:" + std::to_string(port) + " 2>&1";
@@ -203,7 +202,7 @@ namespace adb
 	* Removes the reversed tcp port and cleans up.
 	* adb reverse --remove tcp:<port>
 	*/
-	bool stop(int port)
+	inline bool stop(int port)
 	{
 		std::string path = adbPath();
 		
