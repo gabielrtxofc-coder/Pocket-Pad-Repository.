@@ -3,6 +3,7 @@ package com.darusc.mousedroid.networking
 import com.darusc.mousedroid.layouts.Keycode
 import com.darusc.mousedroid.layouts.KeyboardLayout
 import com.darusc.mousedroid.mkinput.InputEvent
+import com.darusc.mousedroid.networking.toSocketReport
 import org.junit.Assert.*
 import org.junit.Test
 

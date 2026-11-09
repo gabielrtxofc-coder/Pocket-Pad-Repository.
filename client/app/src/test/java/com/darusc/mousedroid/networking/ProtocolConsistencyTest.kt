@@ -5,6 +5,8 @@ import com.darusc.mousedroid.networking.bluetooth.REPORT_ID_KEYBOARD
 import com.darusc.mousedroid.networking.bluetooth.REPORT_ID_MEDIA
 import com.darusc.mousedroid.networking.bluetooth.REPORT_ID_MOUSE
 import com.darusc.mousedroid.networking.bluetooth.REPORT_ID_BATTERY
+import com.darusc.mousedroid.networking.toSocketReport
+import com.darusc.mousedroid.networking.toHIDReport
 import org.junit.Assert.*
 import org.junit.Test
 

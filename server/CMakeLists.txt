@@ -99,13 +99,12 @@ add_executable(pocket_pad_tests
 # dependencies.
 target_include_directories(pocket_pad_tests PRIVATE
     ${CMAKE_SOURCE_DIR}/src
-    ${googletest_SOURCE_DIR}/googletest/include
 )
 
 target_link_libraries(pocket_pad_tests PRIVATE
     GTest::gtest
 )
 
-# Register the test with CTest
-include(GoogleTest)
-gtest_discover_tests(pocket_pad_tests)
+# Register the test with CTest using add_test (simpler than gtest_discover_tests
+# and doesn't require running the binary at build time)
+add_test(NAME pocket_pad_tests COMMAND pocket_pad_tests)
