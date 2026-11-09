@@ -190,3 +190,55 @@ grep -rn "Espresso\|onView" client/app/src
 | Apenas documentação e inventários adicionados | ✅ `docs/audit/` (8 arquivos) |
 
 **Nenhuma alteração funcional foi introduzida.** A verificação final está na última seção do relatório da missão.
+
+---
+
+## 6. Status desta auditoria após a Missão 04 (limpeza executada)
+
+> **Esta auditoria é preservada como fotografia histórica e NÃO foi reescrita.**
+> A Missão 04 executou a limpeza e produziu documentos próprios em [`../cleanup/`](../cleanup/).
+> Nada neste diretório foi alterado — inclusive os números abaixo, que descrevem o estado de
+> `main` @ `164372b` / `8b796fa`, **antes** da limpeza.
+
+### 6.1 Fotografia × resultado
+
+| Classificação | Arquivos na fotografia | Removidos na Missão 04 | Preservados | Observação |
+|---|---:|---:|---:|---|
+| MANTER | 71 | **0** | 71 | nenhum MANTER foi tocado |
+| ADAPTAR | 101 | **1** | 100 | apenas `local.properties` (destrackeado, não apagado) |
+| REMOVER | 13 | **12** | 1 | `BatteryMonitor.kt` é falso positivo (ver 6.2) |
+| INVESTIGAR | 21 | **4** | 17 | 4 metadados de IDE resolvidos; 17 continuam INVESTIGAR |
+| **Total** | **206** | **17** | **189** | — |
+
+> **Como os 17 se distribuem:** 4 arquivos de `client/.gradle/` + `client/README.md` + 5 drawables
+> órfãos + 2 testes-exemplo + 4 metadados de `.idea/` + `client/local.properties` = **17**.
+> O único arquivo classificado REMOVER que **não** saiu foi `BatteryMonitor.kt` (seção 6.2).
+> Os 5 drawables contam como REMOVER porque a classificação **por arquivo** assim os define, embora o
+> componente C20 esteja etiquetado ADAPTAR — ver
+> [`../cleanup/REMOVAL-ANALYSIS.md`](../cleanup/REMOVAL-ANALYSIS.md) §3.1.1.
+
+### 6.2 O único erro de classificação encontrado (confiança Alta)
+
+| Arquivo | Classificação da auditoria | Realidade verificada |
+|---|---|---|
+| `client/app/src/main/java/com/darusc/mousedroid/BatteryMonitor.kt` | **REMOVER / Alta** | **Compilado e chamado.** `ConnectionManager.kt:7` importa; `:16` implementa `BatteryMonitor.Listener`; `:25` registra o listener no `init`; `MainActivity.kt:63` chama `BatteryMonitor.getInstance().stop()` de forma **não comentada** |
+
+A inferência "código morto" partiu do `start()` comentado em `MainActivity.kt:33`. `start()` comentado
+significa **receiver não registrado**, não **classe inútil**. Remover os 13 arquivos "porque a auditoria
+disse" teria **quebrado o build Android**.
+
+**Lição:** a classificação de auditoria **não é autorização de remoção** — exatamente o princípio que a
+Missão 04 adotou desde o início.
+
+### 6.3 Números finais da Missão 04
+
+| Métrica | Valor |
+|---|---|
+| Arquivos rastreados antes | 217 |
+| Arquivos rastreados depois | 210 |
+| Entradas removidas do índice | **17** |
+| Bytes removidos | **75.992** |
+| Arquivos adicionados | 8 em `docs/cleanup/` + `.gitignore` na raiz = **9** |
+| Alterações em `server/`, `LICENSE`, `.github/`, código Kotlin ou build | **zero** |
+
+Documentos da limpeza: [`../cleanup/README.md`](../cleanup/README.md).

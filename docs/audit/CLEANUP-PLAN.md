@@ -1,6 +1,40 @@
 # Plano de limpeza e adaptação — Pocket Pad
 
-> Missão 03. **Nada neste documento foi executado.** É um plano para missões futuras.
+> ## ⚠️ STATUS ATUALIZADO — Missão 04 (2026-11-09)
+>
+> **Este plano foi parcialmente executado.** O corpo abaixo é preservado **sem alteração** como
+> registro histórico do que a Missão 03 propôs. Para o que realmente aconteceu, ver
+> [`../cleanup/CLEANUP-EXECUTION.md`](../cleanup/CLEANUP-EXECUTION.md).
+>
+> | Etapa do plano | Status na Missão 04 | Onde |
+> |---|---|---|
+> | **0** — corrigir gatilho do CI | ✅ já feito na Missão 03.1 | `docs/foundation/CI-OPERATIONS.md` |
+> | **1** — remover `client/.gradle/` | ✅ **executada** | commit `7f55026` |
+> | **2** — destrackear `local.properties` | ✅ **executada** | commit `31c181b` |
+> | **3** — bits `+x` | ✅ **executada** | commit `ff09004` |
+> | **4** — remover 5 drawables órfãos | ✅ **executada** (`logo.png` **não** é órfão — preservado) | commit `9cef765` |
+> | **5** — testes reais **antes** de remover código | ⚠️ **não executada** — a remoção dos exemplos foi feita **sem** substituto; vira pendência **P1** | `../cleanup/OPEN-QUESTIONS.md` |
+> | **6** — remover caminho de bateria | ❌ **cancelada** — `BatteryMonitor.kt` **não** é código morto (é importado e chamado). Reclassificado INVESTIGAR | `../cleanup/REMOVAL-ANALYSIS.md` MC12 |
+> | **7** — `PacketType` / `Connection::Send` | ❌ **não executada** — exige editar C++, que é refatoração proibida nesta missão | `../cleanup/CLEANUP-EXECUTION.md` §4 |
+> | **8** — remover `client/README.md` | ✅ **executada** | commit `7f55026` |
+> | **9** — 7 correções do servidor | ❌ **não executada** — correções de comportamento, fora do escopo de limpeza. Registradas como D3–D8 | `../cleanup/CLEANUP-EXECUTION.md` §4 |
+> | **10** — decidir sobre `.idea/` | ⚠️ **parcial** — 4 arquivos removidos por critério objetivo; 11 preservados; decisão final adiada | `../cleanup/REPOSITORY-HYGIENE.md` §3 |
+> | **11** — remover Gson/kapt/Espresso | ❌ **não executada** — exige editar `build.gradle`, que é ADAPTAR | `../cleanup/OPEN-QUESTIONS.md` |
+> | **12** — higiene de nomes | ❌ **não executada** | — |
+> | **13** — atualizar dependências | ❌ **não executada** — explicitamente fora do escopo ("não atualizar bibliotecas sem necessidade") | — |
+>
+> ### Duas correções importantes ao plano
+>
+> 1. **A Etapa 6 estava errada.** O plano afirma que o caminho de bateria é "código morto comprovado".
+>    Não é: `ConnectionManager.kt:7,16,25,32` e `MainActivity.kt:63` usam `BatteryMonitor` em código
+>    **não comentado**. Executar a Etapa 6 teria quebrado o build.
+> 2. **A Etapa 5 é pré-requisito da Etapa 4 de "testes", não das remoções de recursos.** A ordem correta
+>    foi mantida para os drawables (nenhum teste necessário), mas a remoção dos testes-exemplo sem
+>    substituto deixou os jobs de CI sem cobertura — registrado como pendência obrigatória **P1**.
+>
+> ---
+>
+> Missão 03. **Nada neste documento foi executado** *à época em que foi escrito*. É um plano para missões futuras.
 > Princípio invariante: **em nenhum momento o repositório pode deixar de compilar** para Android, Linux e Windows, nem perder a capacidade de rodar os três modos.
 > Cada etapa é independente e reversível; cada etapa termina com o CI verde como condição de aceitação.
 
