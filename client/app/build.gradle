@@ -34,6 +34,10 @@ android {
         jvmTarget = '17'
     }
 
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+
     dependenciesInfo {
         includeInApk = false
         includeInBundle = false

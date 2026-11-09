@@ -10,6 +10,7 @@
 
 #ifdef _WIN32
     #include "windows.h"
+    #include "adb.hpp"
 #endif
 
 class SettingsManager
@@ -31,6 +32,13 @@ class SettingsManager
         bool ADBOnOff();
         bool ADBState();
 
+        #ifdef _WIN32
+            // Device status monitoring
+            adb::DeviceStatus GetDeviceStatus();
+            std::string GetDeviceStatusMessage();
+            bool TryReconnectADB();
+        #endif
+
     private:
         std::ifstream fin;
         std::map<std::string, std::string> settings;
@@ -39,6 +47,10 @@ class SettingsManager
         bool bMinToTaskbar;
 
         bool bAdbStarted;
+        
+        #ifdef _WIN32
+            adb::DeviceStatus lastDeviceStatus;
+        #endif
 
         std::string GetFilePath();
         void LoadConfigs();

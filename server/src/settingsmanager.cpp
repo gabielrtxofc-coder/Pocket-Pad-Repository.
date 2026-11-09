@@ -1,10 +1,14 @@
 #include "settingsmanager.h"
 
+#ifdef _WIN32
 #include "adb.hpp"
+#endif
 
 SettingsManager::SettingsManager() : bAdbStarted(false)
 {
     #ifdef _WIN32
+        lastDeviceStatus = adb::DeviceStatus::NONE;
+        
         char buff[128] = { 0 };
         DWORD buffSize = sizeof(buff);
 
@@ -119,12 +123,31 @@ bool SettingsManager::ADBOnOff()
 
 void SettingsManager::ADBOn()
 {
-    int a;
     #ifdef _WIN32
-        //a = system("adb reverse tcp:6969 tcp:6969");        
+        // Check if a device is connected before attempting reverse
+        lastDeviceStatus = adb::checkDevices();
+        
+        if (lastDeviceStatus == adb::DeviceStatus::NONE) {
+            LOG("[ADB] No device connected. Waiting for device...");
+            return;
+        }
+        
+        if (lastDeviceStatus == adb::DeviceStatus::UNAUTHORIZED) {
+            LOG("[ADB] Device connected but not authorized. User must authorize on phone.");
+            return;
+        }
+        
+        if (lastDeviceStatus == adb::DeviceStatus::MULTIPLE) {
+            LOG("[ADB] Multiple devices detected. ADB reverse applies to first device.");
+        }
+        
         bAdbStarted = adb::start(6969);
+        
+        if (bAdbStarted) {
+            lastDeviceStatus = adb::DeviceStatus::CONNECTED;
+        }
     #else
-        a = system("./adb reverse tcp:6969 tcp:6969");
+        int a = system("./adb reverse tcp:6969 tcp:6969");
         if(a == 0)
         {
             LOG("ADB Server [PORT 6969] STARTED");
@@ -140,8 +163,7 @@ void SettingsManager::ADBOff()
     if(bAdbStarted)
     {
         #ifdef _WIN32
-            //int a = system("adb reverse --remove-all");
-            adb::kill(6969);
+            adb::stop(6969);
         #else
             int a = system("./adb reverse --remove-all");
             LOG("ADB Server [PORT 6969] STOPPED");
@@ -154,3 +176,34 @@ bool SettingsManager::ADBState()
 {
     return bAdbStarted;
 }
+
+#ifdef _WIN32
+adb::DeviceStatus SettingsManager::GetDeviceStatus()
+{
+    lastDeviceStatus = adb::checkDevices();
+    return lastDeviceStatus;
+}
+
+std::string SettingsManager::GetDeviceStatusMessage()
+{
+    return adb::statusMessage(lastDeviceStatus);
+}
+
+bool SettingsManager::TryReconnectADB()
+{
+    adb::DeviceStatus status = adb::checkDevices();
+    lastDeviceStatus = status;
+    
+    if (status == adb::DeviceStatus::CONNECTED || status == adb::DeviceStatus::MULTIPLE) {
+        if (!bAdbStarted) {
+            bAdbStarted = adb::start(6969);
+            if (bAdbStarted) {
+                LOG("[ADB] Auto-reconnected reverse tunnel");
+            }
+        }
+        return bAdbStarted;
+    }
+    
+    return false;
+}
+#endif

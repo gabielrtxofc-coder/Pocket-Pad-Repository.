@@ -29,6 +29,7 @@ import androidx.navigation.fragment.findNavController
 import com.darusc.mousedroid.R
 import com.darusc.mousedroid.databinding.FragmentMainBinding
 import com.darusc.mousedroid.networking.Connection
+import com.darusc.mousedroid.networking.hasUsbConnection
 import com.darusc.mousedroid.viewmodels.ConnectionViewModel
 import kotlinx.coroutines.launch
 
@@ -85,21 +86,57 @@ class Main : Fragment() {
             startActivity(intent)
         }
 
+        // Auto-connect if USB is available when the fragment is shown
+        tryAutoConnectUsb()
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    viewModel.state.collect {
-                        when (it) {
+                    viewModel.state.collect { state ->
+                        when (state) {
+                            is ConnectionViewModel.State.Searching -> {
+                                if (!loadingPopup.isShowing) {
+                                    loadingPopup.contentView.findViewById<TextView>(R.id.loadingMessage).text = state.message
+                                    loadingPopup.showAtLocation(binding.root, Gravity.CENTER, 0, 0)
+                                }
+                                // Hide the buttons when searching/connecting automatically
+                                binding.btnConnectSV.visibility = View.GONE
+                                binding.btnConnectBT.visibility = View.GONE
+                                binding.btnPairBT.visibility = View.GONE
+                            }
+
                             is ConnectionViewModel.State.Connecting -> {
                                 if (!loadingPopup.isShowing) {
-                                    loadingPopup.contentView.findViewById<TextView>(R.id.loadingMessage).text = it.message
+                                    loadingPopup.contentView.findViewById<TextView>(R.id.loadingMessage).text = state.message
                                     loadingPopup.showAtLocation(binding.root, Gravity.CENTER, 0, 0)
                                 }
                             }
 
-                            is ConnectionViewModel.State.Idle -> loadingPopup.dismiss()
-                            is ConnectionViewModel.State.Connected -> loadingPopup.dismiss()
+                            is ConnectionViewModel.State.Reconnecting -> {
+                                if (!loadingPopup.isShowing) {
+                                    loadingPopup.contentView.findViewById<TextView>(R.id.loadingMessage).text = "Reconnecting... (attempt ${state.attempt})"
+                                    loadingPopup.showAtLocation(binding.root, Gravity.CENTER, 0, 0)
+                                }
+                            }
+
+                            is ConnectionViewModel.State.Idle -> {
+                                loadingPopup.dismiss()
+                                // Show buttons again
+                                binding.btnConnectSV.visibility = View.VISIBLE
+                                binding.btnConnectBT.visibility = View.VISIBLE
+                                binding.btnPairBT.visibility = View.VISIBLE
+                            }
+
+                            is ConnectionViewModel.State.Connected -> {
+                                loadingPopup.dismiss()
+                            }
+
+                            is ConnectionViewModel.State.Error -> {
+                                loadingPopup.dismiss()
+                                binding.btnConnectSV.visibility = View.VISIBLE
+                                binding.btnConnectBT.visibility = View.VISIBLE
+                                binding.btnPairBT.visibility = View.VISIBLE
+                            }
                         }
                     }
                 }
@@ -120,12 +157,12 @@ class Main : Fragment() {
                             is ConnectionViewModel.Event.ConnectionDisconnected -> {
                                 val pview = showPopupDialog(R.layout.connection_disconnected_fragment)
                                 pview?.apply {
-                                    if(it.connectionMode == Connection.Mode.BLUETOOTH) {
+                                    if (it.connectionMode == Connection.Mode.BLUETOOTH) {
                                         findViewById<TextView>(R.id.subtitle).text = "Bluetooth connection to ${it.hostName} was terminated"
                                         findViewById<TextView>(R.id.description).text = "Host device turned bluetooth off or disconnected this device"
                                     } else {
-                                        findViewById<TextView>(R.id.subtitle).text = "${it.connectionMode.name} Connection to Mousedroid server was interrupted."
-                                        findViewById<TextView>(R.id.description).text = "Make sure the server is still ON and ADB/WIFI is active."
+                                        findViewById<TextView>(R.id.subtitle).text = "USB connection was interrupted"
+                                        findViewById<TextView>(R.id.description).text = "Reconnecting automatically... If this persists, check the USB cable and make sure the server is running."
                                     }
                                 }
                             }
@@ -133,12 +170,15 @@ class Main : Fragment() {
                             is ConnectionViewModel.Event.ConnectionFailed -> {
                                 val pview = showPopupDialog(R.layout.connection_failed_fragment)
                                 pview?.apply {
-                                    if(it.connectionMode == Connection.Mode.BLUETOOTH) {
+                                    if (it.connectionMode == Connection.Mode.BLUETOOTH) {
                                         findViewById<TextView>(R.id.subtitle).text = "Bluetooth connection failed"
                                         findViewById<TextView>(R.id.description).text = "Make sure the device is on"
+                                    } else if (it.connectionMode == Connection.Mode.USB) {
+                                        findViewById<TextView>(R.id.subtitle).text = "USB connection failed"
+                                        findViewById<TextView>(R.id.description).text = "Make sure:\n• The server is running on your computer\n• USB debugging is enabled on this phone\n• You authorized this computer on your phone"
                                     } else {
-                                        findViewById<TextView>(R.id.subtitle).text = "Connection to Mousedroid server failed"
-                                        findViewById<TextView>(R.id.description).text = "To connect over WIFI make sure you are on the same network as the computer.\nTo connect over USB make sure ADB is on and debugging is enabled.\nMake sure Mousedroid server is allowed through the firewall. "
+                                        findViewById<TextView>(R.id.subtitle).text = "Connection failed"
+                                        findViewById<TextView>(R.id.description).text = "To connect over WiFi make sure you are on the same network.\nTo connect over USB make sure the server is running and ADB is on."
                                     }
                                 }
                             }
@@ -153,6 +193,22 @@ class Main : Fragment() {
                 }
             }
         }
+    }
+
+    /**
+     * Try to auto-connect via USB when the fragment becomes visible.
+     */
+    private fun tryAutoConnectUsb() {
+        val context = context ?: return
+        if (hasUsbConnection(context)) {
+            viewModel.tryAutoConnect(context)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Try auto-connect again when returning from other fragments
+        tryAutoConnectUsb()
     }
 
     override fun onDestroy() {
