@@ -293,10 +293,17 @@ dependências do aplicativo.
 
 | Data | Tipo | Run | Commit | Resultado |
 |---|---|---|---|---|
+| 2026-11-09 | `pull_request` (teste controlado, PR #3 — fechado sem merge) | [#12 / 42556808420](https://github.com/gabielrtxofc-coder/Pocket-Pad-Repository./actions/runs/42556808420) | `1b91ca6` | **sucesso** — 4/4 jobs (prova do gatilho automático) |
+| 2026-11-09 | `push` (main, após merge do PR #2) | [#11 / 42555421922](https://github.com/gabielrtxofc-coder/Pocket-Pad-Repository./actions/runs/42555421922) | `3ac5503` | **sucesso** — 4/4 jobs (prova do gatilho de push na main) |
+| 2026-11-09 | `pull_request` (PR #2, commit de documentação) | [#10 / 42555375837](https://github.com/gabielrtxofc-coder/Pocket-Pad-Repository./actions/runs/42555375837) | `5ec70b1` | sucesso — 4/4 jobs |
 | 2026-11-09 | `pull_request` (PR #2, após correção) | [#9 / 42554360881](https://github.com/gabielrtxofc-coder/Pocket-Pad-Repository./actions/runs/42554360881) | `db37ac9` | **sucesso** — 4/4 jobs |
 | 2026-11-09 | `pull_request` (PR #2, antes da correção do checkout Windows) | [#8 / 42553331446](https://github.com/gabielrtxofc-coder/Pocket-Pad-Repository./actions/runs/42553331446) | `ad84bf0` | **falha** no job Windows (checkout) — diagnosticada e corrigida |
 | 2026-11-09 | `workflow_dispatch` (branch de trabalho) | [#7 / 42551971029](https://github.com/gabielrtxofc-coder/Pocket-Pad-Repository./actions/runs/42551971029) | `f315942` | **sucesso** — 4/4 jobs |
 | 2026-11-08 | `push` (branch antiga, antes da correção) | [#6 / 42524050240](https://github.com/gabielrtxofc-coder/Pocket-Pad-Repository./actions/runs/42524050240) | `a434774` | sucesso — 4/4 jobs |
+
+O **teste controlado** (PR #3) usou uma alteração documental temporária em uma
+branch dedicada; o PR foi fechado sem merge e a branch removida. Ele comprova que
+o gatilho `pull_request` dispara automaticamente e executa os quatro jobs.
 
 ### Diagnóstico da falha do run 42553331446 (job Windows)
 
