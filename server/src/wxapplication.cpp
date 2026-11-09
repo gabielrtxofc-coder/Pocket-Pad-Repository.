@@ -11,6 +11,9 @@ bool wxApplication::OnInit()
     main_frame = new wxMain(settings);
     
     server = new Server(6969, *this, settings, inputManager);
+    
+    // Give the main frame a reference to the server for status updates
+    main_frame->server = server;
 
     Server::HostInfo hostInfo = server->GetHostInfo();
     
@@ -35,7 +38,7 @@ void wxApplication::OnDeviceConnected(std::string device) const
 
 void wxApplication::OnDeviceDisconnected(std::string device) const
 {
-	auto devices = server->GetConnectedDevicesInfo();
+    auto devices = server->GetConnectedDevicesInfo();
     main_frame->wxdevlist->SetDevices(devices);
 }
 
