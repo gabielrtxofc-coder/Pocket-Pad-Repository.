@@ -66,7 +66,14 @@ jobs:
 
       - name: Run unit tests and assemble debug APK
         working-directory: client
-        run: bash ./gradlew testDebugUnitTest assembleDebug --no-daemon --stacktrace
+        run: |
+          bash ./gradlew testDebugUnitTest assembleDebug --no-daemon --stacktrace 2>&1 | tee android-build.log
+          BUILD_EXIT=${PIPESTATUS[0]}
+          if [ $BUILD_EXIT -ne 0 ]; then
+            echo "=== BUILD FAILED (exit code $BUILD_EXIT) ==="
+            grep -E "error:|FAILURE|e:|Error|Exception" android-build.log | head -60
+            exit $BUILD_EXIT
+          fi
 
       - name: Summarize unit test results
         run: |
@@ -83,6 +90,14 @@ jobs:
           name: mousedroid-debug-apk
           path: client/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+      - name: Upload Android build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build-log
+          path: client/android-build.log
+          if-no-files-found: ignore
 
       - name: Upload Android test reports
         if: always()
