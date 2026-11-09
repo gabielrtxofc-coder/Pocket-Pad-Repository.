@@ -67,14 +67,6 @@ jobs:
       - name: Run unit tests and assemble debug APK
         working-directory: client
         run: |
-          echo "=== Running unit tests ==="
-          bash ./gradlew testDebugUnitTest --no-daemon --stacktrace 2>&1 | tee test-output.log
-          TEST_EXIT=${PIPESTATUS[0]}
-          echo "=== Tests exited with code $TEST_EXIT ==="
-          if [ $TEST_EXIT -ne 0 ]; then
-            echo "=== TEST FAILURES ==="
-            grep -E "FAILED|Error|Exception|e:|FAILURE|failed" test-output.log | head -40
-          fi
           echo "=== Assembling debug APK ==="
           bash ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee build-output.log
           BUILD_EXIT=${PIPESTATUS[0]}
@@ -82,10 +74,18 @@ jobs:
           if [ $BUILD_EXIT -ne 0 ]; then
             echo "=== BUILD FAILURES ==="
             grep -E "error:|FAILED|e:|Error|Exception|FAILURE" build-output.log | head -40
+            exit $BUILD_EXIT
           fi
-          cat test-output.log build-output.log > android-build.log
-          if [ $TEST_EXIT -ne 0 ]; then exit $TEST_EXIT; fi
-          if [ $BUILD_EXIT -ne 0 ]; then exit $BUILD_EXIT; fi
+          echo "=== Running unit tests ==="
+          bash ./gradlew testDebugUnitTest --no-daemon --stacktrace --continue 2>&1 | tee test-output.log
+          TEST_EXIT=${PIPESTATUS[0]}
+          echo "=== Tests exited with code $TEST_EXIT ==="
+          if [ $TEST_EXIT -ne 0 ]; then
+            echo "=== TEST FAILURES ==="
+            grep -E "FAILED|e:|failure|Exception" test-output.log | head -40
+          fi
+          cat build-output.log test-output.log > android-build.log
+          exit $TEST_EXIT
 
       - name: Summarize unit test results
         run: |
