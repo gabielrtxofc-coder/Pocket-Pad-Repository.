@@ -279,6 +279,7 @@ Falhas em artifacts de relatório (`ignore`) não falham o job.
 | Remoção do filtro `paths` | workflow | Evitar excluir por acidente arquivos importantes da compilação |
 | `concurrency` explícito (`cancel-in-progress: false`) | workflow | Evitar cancelar execuções em curso |
 | `permissions: contents: read` mantido | workflow | Menor privilégio |
+| Checkout Windows: fetch do commit `github.sha` | workflow | `github.ref_name` não é o nome da branch em `pull_request`; o `git clone --branch` falhava em PRs. O job agora faz `git init` + `git fetch --depth 1 origin $GITHUB_SHA` + `checkout`, funcionando em push, pull_request e workflow_dispatch |
 | Documento operacional | `docs/foundation/CI-OPERATIONS.md` | Documentação exigida |
 
 Nenhuma alteração foi feita no código Android, C++, protocolo, licença ou
@@ -292,8 +293,19 @@ dependências do aplicativo.
 
 | Data | Tipo | Run | Commit | Resultado |
 |---|---|---|---|---|
+| 2026-11-09 | `pull_request` (PR #2, após correção) | [#9 / 42554360881](https://github.com/gabielrtxofc-coder/Pocket-Pad-Repository./actions/runs/42554360881) | `db37ac9` | **sucesso** — 4/4 jobs |
+| 2026-11-09 | `pull_request` (PR #2, antes da correção do checkout Windows) | [#8 / 42553331446](https://github.com/gabielrtxofc-coder/Pocket-Pad-Repository./actions/runs/42553331446) | `ad84bf0` | **falha** no job Windows (checkout) — diagnosticada e corrigida |
 | 2026-11-09 | `workflow_dispatch` (branch de trabalho) | [#7 / 42551971029](https://github.com/gabielrtxofc-coder/Pocket-Pad-Repository./actions/runs/42551971029) | `f315942` | **sucesso** — 4/4 jobs |
 | 2026-11-08 | `push` (branch antiga, antes da correção) | [#6 / 42524050240](https://github.com/gabielrtxofc-coder/Pocket-Pad-Repository./actions/runs/42524050240) | `a434774` | sucesso — 4/4 jobs |
+
+### Diagnóstico da falha do run 42553331446 (job Windows)
+
+O job Windows fazia `git clone --depth 1 --branch "${{ github.ref_name }}"`. Em
+eventos `pull_request`, `github.ref_name` não representa a branch de origem, de
+forma que o clone falhava e o job Windows não iniciava os passos de build
+(`skipped`). Isso **não** ocorre em `workflow_dispatch` nem em `push`, donde
+o mesmo job passar. Corrigido ao fetchar o commit exato `github.sha`. Após a
+correção, o run `pull_request` #9 passou nos quatro jobs.
 
 ### Detalhe da execução da Missão 03.1 (run 42551971029)
 
