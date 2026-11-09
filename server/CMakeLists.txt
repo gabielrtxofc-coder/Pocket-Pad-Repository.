@@ -104,7 +104,6 @@ target_include_directories(pocket_pad_tests PRIVATE
 
 target_link_libraries(pocket_pad_tests PRIVATE
     GTest::gtest
-    GTest::gtest_main
 )
 
 # Register the test with CTest

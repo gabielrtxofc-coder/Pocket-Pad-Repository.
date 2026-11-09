@@ -31,6 +31,14 @@
 // Include device.h for DeviceInfo parsing test
 #include "net/device.h"
 
+// Provide definitions for extern variables declared in protocol.h.
+// In the real application, these are defined in linuxinputmanager.cpp
+// and windowsinputmanager.cpp. The test binary doesn't link those files.
+namespace InputManager {
+    int MOVE_SENSITIVITY = 1;
+    int SCROLL_SENSITIVITY = 1;
+}
+
 /**
  * StubInputManager — records all method calls for verification.
  * Inherits from InputManager::Base and overrides all pure virtual methods
