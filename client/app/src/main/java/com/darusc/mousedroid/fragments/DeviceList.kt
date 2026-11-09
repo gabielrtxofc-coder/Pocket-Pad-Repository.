@@ -119,14 +119,27 @@ class DeviceList : Fragment() {
                 launch {
                     connectionViewModel.state.collect {
                         when(it) {
+                            is ConnectionViewModel.State.Searching -> {
+                                if (!loadingPopup.isShowing) {
+                                    loadingPopup.contentView.findViewById<TextView>(R.id.loadingMessage).text = it.message
+                                    loadingPopup.showAtLocation(binding.root, Gravity.CENTER, 0, 0)
+                                }
+                            }
                             is ConnectionViewModel.State.Connecting -> {
                                 if (!loadingPopup.isShowing) {
                                     loadingPopup.contentView.findViewById<TextView>(R.id.loadingMessage).text = it.message
                                     loadingPopup.showAtLocation(binding.root, Gravity.CENTER, 0, 0)
                                 }
                             }
+                            is ConnectionViewModel.State.Reconnecting -> {
+                                if (!loadingPopup.isShowing) {
+                                    loadingPopup.contentView.findViewById<TextView>(R.id.loadingMessage).text = "Reconnecting... (attempt ${it.attempt})"
+                                    loadingPopup.showAtLocation(binding.root, Gravity.CENTER, 0, 0)
+                                }
+                            }
                             is ConnectionViewModel.State.Idle -> loadingPopup.dismiss()
                             is ConnectionViewModel.State.Connected -> loadingPopup.dismiss()
+                            is ConnectionViewModel.State.Error -> loadingPopup.dismiss()
                         }
                     }
                 }

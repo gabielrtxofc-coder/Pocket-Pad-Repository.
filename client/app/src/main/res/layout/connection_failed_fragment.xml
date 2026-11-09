@@ -29,7 +29,7 @@
         android:gravity="center"
         android:textColor="@color/md_theme_dark_error"
         app:layout_constraintTop_toBottomOf="@+id/title"
-        tools:text="Connection to Mousedroid server failed." />
+        tools:text="USB connection failed" />
 
     <TextView
         android:id="@+id/description"
@@ -38,7 +38,7 @@
         android:layout_marginTop="10dp"
         android:gravity="center"
         app:layout_constraintTop_toBottomOf="@+id/subtitle"
-        tools:text="Make sure the server is on and you are on the same LAN." />
+        tools:text="Make sure:\n• The server is running on your computer\n• USB debugging is enabled\n• You authorized this computer" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnOK"

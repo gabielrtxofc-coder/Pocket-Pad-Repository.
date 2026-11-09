@@ -1,5 +1,10 @@
 #include "wxmain.h"
 
+#ifdef _WIN32
+#include "adb.hpp"
+#include "net/server.h"
+#endif
+
 #include "../res/icon.xpm"
 
 wxBEGIN_EVENT_TABLE(wxMain, wxFrame)
@@ -8,11 +13,13 @@ wxBEGIN_EVENT_TABLE(wxMain, wxFrame)
     EVT_CHECKBOX(CHK_MINTASK, wxMain::CheckboxCmdHandler)
     EVT_COMMAND_SCROLL(SL_MOVE, wxMain::SliderCmdHandler)
     EVT_COMMAND_SCROLL(SL_SCROLL, wxMain::SliderCmdHandler)
+    EVT_TIMER(TIMER_DEVICE_CHECK, wxMain::OnDeviceCheckTimer)
 wxEND_EVENT_TABLE()
 
 wxMain::wxMain(SettingsManager &_settings) : 
-    wxFrame(NULL, wxID_ANY, "Mousedroid", wxDefaultPosition, wxSize(APP_WIDTH, APP_HEIGHT), wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER & ~wxMAXIMIZE_BOX),
-    settings(_settings)
+    wxFrame(NULL, wxID_ANY, "Pocket Pad", wxDefaultPosition, wxSize(APP_WIDTH, APP_HEIGHT), wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER & ~wxMAXIMIZE_BOX),
+    settings(_settings),
+    deviceCheckTimer(this, TIMER_DEVICE_CHECK)
 {
     wxnotebook = new wxNotebook(this, wxID_ANY, wxPoint(APP_MARGIN, APP_MARGIN), wxSize(APP_WIDTH - 23, APP_HEIGHT - 45), wxNB_TOP);
 
@@ -29,11 +36,14 @@ wxMain::wxMain(SettingsManager &_settings) :
     #endif
 
     tb = new wxMTaskbar(this);
-    tb->SetIcon(icon, "Mousedroid");
+    tb->SetIcon(icon, "Pocket Pad");
     
     InitStatusTab();
     InitSettingsTab();
     InitLogTab();
+    
+    // Start periodic device status checking (every 2 seconds)
+    deviceCheckTimer.Start(2000);
 }   
 
 void wxMain::InitStatusTab()
@@ -44,7 +54,6 @@ void wxMain::InitStatusTab()
     wxStaticBoxSizer *ipsizer = new wxStaticBoxSizer(wxVERTICAL, tab_status, "This PC");
 
     wxBoxSizer *r1 = new wxBoxSizer(wxHORIZONTAL);
-
     r1->Add(new wxStaticText(tab_status, wxID_ANY, "Name: "));
     wxStaticText *sb1 = new wxStaticText(tab_status, HOST_NAME_TXT, "");
     sb1->SetFont(wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
@@ -59,24 +68,22 @@ void wxMain::InitStatusTab()
     ipsizer->Add(r1);
     ipsizer->Add(r2);
 
-    // ==== Device list ==== 
+    // ==== Device status ====
+    wxStaticBoxSizer *devsizer = new wxStaticBoxSizer(wxVERTICAL, tab_status, "Android Device");
+
+    // Device status text
+    deviceStatusText = new wxStaticText(tab_status, wxID_ANY, "Checking...");
+    deviceStatusText->SetFont(wxFont(11, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
+    devsizer->Add(deviceStatusText, wxSizerFlags().Border(wxALL, 8));
+    
+    // Connection status text
+    connectionStatusText = new wxStaticText(tab_status, wxID_ANY, "Waiting for connection...");
+    connectionStatusText->SetFont(wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+    devsizer->Add(connectionStatusText, wxSizerFlags().Border(wxLEFT | wxRIGHT | wxBOTTOM, 8));
+
+    // Device list
     wxdevlist = new wxDeviceList(tab_status, wxID_ANY);
-        
-    wxStaticBoxSizer *devsizer = new wxStaticBoxSizer(wxVERTICAL, tab_status, "Devices");
     devsizer->Add(wxdevlist, wxSizerFlags(1).Expand().Border(wxALL, 5));
-
-    adbbutton = new wxButton(tab_status, wxID_ANY, "");
-    adbbutton->Bind(wxEVT_BUTTON, [this](wxCommandEvent &evt){
-        bool res = settings.ADBOnOff();
-
-        if(res)
-            adbbutton->SetLabel("ADB On");
-        else
-            adbbutton->SetLabel("ADB Off");
-    });
-
-    devsizer->Add(adbbutton, wxSizerFlags().Right());
-
 
     topsizer->Add(ipsizer, wxSizerFlags().Expand().Border(wxALL, 5));
     topsizer->Add(devsizer, wxSizerFlags(1).Expand().Border(wxALL, 5));
@@ -159,11 +166,9 @@ void wxMain::InitSettingsTab()
     // ==== Info ====
     wxBoxSizer *info = new wxBoxSizer(wxVERTICAL);
 
-    wxStaticText *t = new wxStaticText(tab_settings, wxID_ANY, "Mousedroid v1.5");
+    wxStaticText *t = new wxStaticText(tab_settings, wxID_ANY, "Pocket Pad");
     t->SetFont(wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
     info->Add(t, wxSizerFlags().Center());
-    info->Add(new wxHyperlinkCtrl(tab_settings, wxID_ANY, "Github", "https://github.com/darusc/Mousedroid"), wxSizerFlags().Center());
-
 
     topsizer2->Add(sysboxsizer, wxSizerFlags().Expand().Border(wxALL, 5));
     topsizer2->Add(ctrlboxsizer, wxSizerFlags().Expand().Border(wxALL, 5));
@@ -203,13 +208,56 @@ void wxMain::SliderCmdHandler(wxScrollEvent &evt)
         settings.SetScrollSensitivity(evt.GetPosition());
 }
 
+void wxMain::OnDeviceCheckTimer(wxTimerEvent& evt)
+{
+    #ifdef _WIN32
+        // Check device status
+        adb::DeviceStatus status = settings.GetDeviceStatus();
+        std::string message = settings.GetDeviceStatusMessage();
+        
+        deviceStatusText->SetLabelText(message);
+        
+        // Try to reconnect ADB if needed
+        if (status == adb::DeviceStatus::CONNECTED || status == adb::DeviceStatus::MULTIPLE) {
+            settings.TryReconnectADB();
+        }
+        
+        // Update connection status based on ADB state and connected devices
+        auto devices = server ? server->GetConnectedDevicesInfo() : std::vector<DeviceInfo>();
+        if (!devices.empty()) {
+            connectionStatusText->SetLabelText("Connected: " + devices[0].Name);
+        } else if (settings.ADBState()) {
+            connectionStatusText->SetLabelText("Ready - waiting for phone to connect...");
+        } else if (status == adb::DeviceStatus::NONE) {
+            connectionStatusText->SetLabelText("Connect your phone via USB");
+        } else if (status == adb::DeviceStatus::UNAUTHORIZED) {
+            connectionStatusText->SetLabelText("Authorize this computer on your phone");
+        } else {
+            connectionStatusText->SetLabelText("Waiting for connection...");
+        }
+    #endif
+}
+
 void wxMain::UpdateUI()
 {
-    std::string label = (settings.ADBState()) ? "ADB On" : "ADB Off";
-    adbbutton->SetLabel(label);
+    // Initial status update
+    #ifdef _WIN32
+        adb::DeviceStatus status = settings.GetDeviceStatus();
+        deviceStatusText->SetLabelText(settings.GetDeviceStatusMessage());
+        
+        if (status == adb::DeviceStatus::CONNECTED || status == adb::DeviceStatus::MULTIPLE) {
+            settings.TryReconnectADB();
+            connectionStatusText->SetLabelText("Ready - waiting for phone to connect...");
+        } else if (status == adb::DeviceStatus::NONE) {
+            connectionStatusText->SetLabelText("Connect your phone via USB");
+        } else if (status == adb::DeviceStatus::UNAUTHORIZED) {
+            connectionStatusText->SetLabelText("Authorize this computer on your phone");
+        }
+    #endif
 }
 
 wxMain::~wxMain()
 {
+    deviceCheckTimer.Stop();
     delete tb;
 }

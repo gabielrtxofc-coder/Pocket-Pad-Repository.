@@ -5,6 +5,8 @@
 
 #define APP_MARGIN 10
 
+#define TIMER_DEVICE_CHECK 2001
+
 #include <wx/wx.h>
 #include <wx/notebook.h>
 #include <wx/msgdlg.h>
@@ -23,14 +25,16 @@
 #define HOST_NAME_TXT 1010
 #define HOST_IP_TXT 1011
 
+class Server; // Forward declaration
+
 class wxMain: public wxFrame
 {
     public:
         wxDeviceList *wxdevlist = nullptr;
         wxPanel *tab_log = nullptr;
-        wxButton *adbbutton = nullptr;
 
         SettingsManager &settings;
+        Server *server = nullptr; // Set by wxApplication after construction
 
         wxMain(SettingsManager &_settings);
         ~wxMain();
@@ -45,6 +49,10 @@ class wxMain: public wxFrame
         wxNotebook *wxnotebook = nullptr;
         wxMTaskbar *tb = nullptr;
         
+        wxStaticText *deviceStatusText = nullptr;
+        wxStaticText *connectionStatusText = nullptr;
+        wxTimer deviceCheckTimer;
+        
         wxDECLARE_EVENT_TABLE();    
 
         void InitStatusTab();   
@@ -53,6 +61,7 @@ class wxMain: public wxFrame
 
         void CheckboxCmdHandler(wxCommandEvent &evt);
         void SliderCmdHandler(wxScrollEvent &evt);
+        void OnDeviceCheckTimer(wxTimerEvent &evt);
 
         void HideWindow(wxIconizeEvent &evt);
         void CloseWindow(wxCloseEvent &evt);
