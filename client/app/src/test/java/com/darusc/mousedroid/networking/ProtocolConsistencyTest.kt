@@ -49,9 +49,9 @@ class ProtocolConsistencyTest {
         checkOpcode(InputEvent.MouseDragState(InputEvent.MouseButton.LEFT, false).toSocketReport()[0][0], "DragUp")
         checkOpcode(InputEvent.Zoom(1).toSocketReport()[0][0], "Zoom")
         checkOpcode(InputEvent.KeyPress(listOf(
-            com.darusc.mousedroid.layouts.KeyboardLayout.Key(0, 0x04)
+            com.darusc.mousedroid.layouts.KeyboardLayout.Key(0.toByte(), 0x04.toByte())
         )).toSocketReport()[0][0], "KeyPress")
-        checkOpcode(InputEvent.NumpadKeyPress(1).toSocketReport()[0][0], "NumpadKeyPress")
+        checkOpcode(InputEvent.NumpadKeyPress(1.toByte()).toSocketReport()[0][0], "NumpadKeyPress")
         checkOpcode(InputEvent.MediaEvent(InputEvent.MediaAction.FORWARD).toSocketReport()[0][0], "MediaEvent")
     }
 
@@ -81,7 +81,7 @@ class ProtocolConsistencyTest {
         actualOpcodes.add(InputEvent.MouseDragState(InputEvent.MouseButton.LEFT, false).toSocketReport()[0][0])  // 0x04
         actualOpcodes.add(InputEvent.MouseMove(0, 0).toSocketReport()[0][0])                          // 0x05
         actualOpcodes.add(InputEvent.MouseScroll(0, 1).toSocketReport()[0][0])                        // 0x06
-        actualOpcodes.add(InputEvent.NumpadKeyPress(1).toSocketReport()[0][0])                        // 0x07
+        actualOpcodes.add(InputEvent.NumpadKeyPress(1.toByte()).toSocketReport()[0][0])                        // 0x07
         actualOpcodes.add(InputEvent.MouseScroll(1, 0).toSocketReport()[0][0])                        // 0x08
         actualOpcodes.add(InputEvent.Zoom(1).toSocketReport()[0][0])                                  // 0x09
         actualOpcodes.add(InputEvent.MediaEvent(InputEvent.MediaAction.FORWARD).toSocketReport()[0][0]) // 0x0A
@@ -125,7 +125,7 @@ class ProtocolConsistencyTest {
         assertEquals(2, InputEvent.MouseScroll(1, 0).toSocketReport()[0].size)
         assertEquals(2, InputEvent.Zoom(1).toSocketReport()[0].size)
         assertEquals(2, InputEvent.MediaEvent(InputEvent.MediaAction.FORWARD).toSocketReport()[0].size)
-        assertEquals(3, InputEvent.NumpadKeyPress(1).toSocketReport()[0].size) // KEYPRESS format
+        assertEquals(3, InputEvent.NumpadKeyPress(1.toByte()).toSocketReport()[0].size) // KEYPRESS format
     }
 
     /**

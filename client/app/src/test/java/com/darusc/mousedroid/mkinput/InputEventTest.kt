@@ -257,7 +257,7 @@ class InputEventTest {
             InputEvent.MouseDragState(InputEvent.MouseButton.LEFT, true),
             InputEvent.Zoom(5),
             InputEvent.KeyPress(emptyList()),
-            InputEvent.NumpadKeyPress(0),
+            InputEvent.NumpadKeyPress(0.toByte()),
             InputEvent.MediaEvent(InputEvent.MediaAction.PLAY_PAUSE),
             InputEvent.BatteryEvent(50)
         )

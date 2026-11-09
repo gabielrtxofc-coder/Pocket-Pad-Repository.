@@ -334,7 +334,7 @@ class TranslatorsSocketTest {
 
     @Test
     fun numpadKeyPress_zeroKey() {
-        val event = InputEvent.NumpadKeyPress(0)
+        val event = InputEvent.NumpadKeyPress(0.toByte())
         val reports = event.toSocketReport()
         assertEquals(0x07.toByte(), reports[0][0])
         assertEquals(0.toByte(), reports[0][1])
@@ -444,7 +444,7 @@ class TranslatorsSocketTest {
         opcodes.add(InputEvent.MouseClick(InputEvent.MouseButton.LEFT).toSocketReport()[0][0])
         opcodes.add(InputEvent.MouseDragState(InputEvent.MouseButton.LEFT, true).toSocketReport()[0][0])
         opcodes.add(InputEvent.Zoom(1).toSocketReport()[0][0])
-        opcodes.add(InputEvent.NumpadKeyPress(1).toSocketReport()[0][0])
+        opcodes.add(InputEvent.NumpadKeyPress(1.toByte()).toSocketReport()[0][0])
         opcodes.add(InputEvent.MediaEvent(InputEvent.MediaAction.FORWARD).toSocketReport()[0][0])
 
         // All opcodes should be unique (7 distinct opcodes for 7 event types that produce reports)
@@ -460,7 +460,7 @@ class TranslatorsSocketTest {
         assertEquals(0x04.toByte(), InputEvent.MouseDragState(InputEvent.MouseButton.LEFT, false).toSocketReport()[0][0])
         assertEquals(0x05.toByte(), InputEvent.MouseMove(1, 1).toSocketReport()[0][0])
         assertEquals(0x06.toByte(), InputEvent.MouseScroll(0, 1).toSocketReport()[0][0])
-        assertEquals(0x07.toByte(), InputEvent.NumpadKeyPress(1).toSocketReport()[0][0])
+        assertEquals(0x07.toByte(), InputEvent.NumpadKeyPress(1.toByte()).toSocketReport()[0][0])
         assertEquals(0x08.toByte(), InputEvent.MouseScroll(1, 0).toSocketReport()[0][0])
         assertEquals(0x09.toByte(), InputEvent.Zoom(1).toSocketReport()[0][0])
         assertEquals(0x0A.toByte(), InputEvent.MediaEvent(InputEvent.MediaAction.FORWARD).toSocketReport()[0][0])
