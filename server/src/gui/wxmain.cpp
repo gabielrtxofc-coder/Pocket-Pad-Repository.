@@ -1,6 +1,10 @@
 #include "wxmain.h"
 #include "net/server.h"
 
+#ifdef _WIN32
+#include "adb.hpp"
+#endif
+
 #include "../res/icon.xpm"
 
 wxBEGIN_EVENT_TABLE(wxMain, wxFrame)

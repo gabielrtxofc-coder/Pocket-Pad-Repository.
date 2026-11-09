@@ -1,10 +1,14 @@
 #include "settingsmanager.h"
 
+#ifdef _WIN32
 #include "adb.hpp"
+#endif
 
-SettingsManager::SettingsManager() : bAdbStarted(false), lastDeviceStatus(adb::DeviceStatus::NONE)
+SettingsManager::SettingsManager() : bAdbStarted(false)
 {
     #ifdef _WIN32
+        lastDeviceStatus = adb::DeviceStatus::NONE;
+        
         char buff[128] = { 0 };
         DWORD buffSize = sizeof(buff);
 
@@ -125,7 +129,6 @@ void SettingsManager::ADBOn()
         
         if (lastDeviceStatus == adb::DeviceStatus::NONE) {
             LOG("[ADB] No device connected. Waiting for device...");
-            // Don't set bAdbStarted yet - will be retried by the monitor
             return;
         }
         
@@ -174,6 +177,7 @@ bool SettingsManager::ADBState()
     return bAdbStarted;
 }
 
+#ifdef _WIN32
 adb::DeviceStatus SettingsManager::GetDeviceStatus()
 {
     lastDeviceStatus = adb::checkDevices();
@@ -187,8 +191,6 @@ std::string SettingsManager::GetDeviceStatusMessage()
 
 bool SettingsManager::TryReconnectADB()
 {
-    // Only attempt if we previously started ADB (meaning user had a device)
-    // or if a device is now detected
     adb::DeviceStatus status = adb::checkDevices();
     lastDeviceStatus = status;
     
@@ -204,3 +206,4 @@ bool SettingsManager::TryReconnectADB()
     
     return false;
 }
+#endif
