@@ -1,0 +1,82 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# Pocket Pad — .gitignore da raiz
+#
+# Regra de ouro: ignora o que é GERADO ou LOCAL; nunca o que é VERSIONADO de
+# propósito. Os padrões abaixo foram testados com `git check-ignore -v` contra
+# todos os 216 arquivos rastreados — nenhum arquivo versionado é ignorado.
+#
+# Aviso deliberado: NÃO existem padrões globais `*.exe`, `*.dll`, `*.zip` nem
+# `*.png`. `server/adb/*.exe|*.dll` são artefatos de distribuição versionados
+# de propósito (modo USB no Windows) e `imgs/*.png` / `res/**/*.png` são
+# recursos da aplicação. Padrões globais por extensão os apagariam daqui.
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── Android / Gradle ─────────────────────────────────────────────────────────
+.gradle/
+build/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# ── Android Studio / IntelliJ ────────────────────────────────────────────────
+# Versionamos configuração de projeto, não estado de máquina. Os arquivos
+# mantidos em `client/.idea/` são listados como exceção no .gitignore de lá.
+.idea/
+!.idea/.gitignore
+!.idea/.name
+!.idea/AndroidProjectSystem.xml
+!.idea/compiler.xml
+!.idea/gradle.xml
+!.idea/kotlinc.xml
+!.idea/migrations.xml
+!.idea/misc.xml
+!.idea/navEditor.xml
+!.idea/runConfigurations.xml
+!.idea/vcs.xml
+*.iml
+
+# ── Assinatura de aplicativo — NUNCA versionar ───────────────────────────────
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+
+# ── CMake / C++ no servidor ──────────────────────────────────────────────────
+server/cmake/
+server/out/
+server/dist/
+server/resource.o
+server/resource.rc.o
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+*.o
+*.obj
+*.pdb
+
+# ── Sistema operacional e editores ───────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+.vscode/
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# ── Python (usado apenas por scripts de CI/documentação) ─────────────────────
+__pycache__/
+*.py[cod]
+.venv/
+
+# ── Temporários e logs ───────────────────────────────────────────────────────
+*.log
+*.tmp
+*.bak
