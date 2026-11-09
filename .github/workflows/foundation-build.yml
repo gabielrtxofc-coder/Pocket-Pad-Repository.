@@ -220,10 +220,18 @@ jobs:
     steps:
       # actions/checkout rejects the repository's default path because its name
       # ends in a dot. Clone this public repository into a Windows-safe path.
+      # The commit is fetched by SHA (not by branch name) so this step also works
+      # on pull_request events, where github.ref_name is not the head branch.
       - name: Check out into a Windows-safe path
         shell: pwsh
         working-directory: D:\a
-        run: git clone --depth 1 --branch "${{ github.ref_name }}" "https://github.com/${{ github.repository }}.git" D:\a\mousedroid-work
+        run: |
+          $dest = 'D:\a\mousedroid-work'
+          git init $dest
+          Set-Location $dest
+          git remote add origin "https://github.com/${{ github.repository }}.git"
+          git fetch --depth 1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
 
       - name: Record compiler and CMake versions
         shell: pwsh
