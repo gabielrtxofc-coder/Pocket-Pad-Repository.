@@ -27,7 +27,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        tools:text="Connection to Mousedroid was interrupted."
+        tools:text="USB connection was interrupted"
         android:gravity="center"
         android:textColor="@color/md_theme_dark_error"
         app:layout_constraintTop_toBottomOf="@+id/title" />
@@ -38,7 +38,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:gravity="center"
-        tools:text="Check the server, adb or WIFI connection and make sure everything is on then reconnect."
+        tools:text="Reconnecting automatically... If this persists, check the USB cable and make sure the server is running."
         app:layout_constraintTop_toBottomOf="@+id/subtitle" />
 
     <com.google.android.material.button.MaterialButton
