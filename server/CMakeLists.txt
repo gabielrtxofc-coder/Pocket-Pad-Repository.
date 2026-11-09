@@ -66,3 +66,22 @@ else()
 endif()
 
 target_include_directories(Mousedroid PRIVATE ./src)
+
+# ===========================================================================
+# Test infrastructure
+# ===========================================================================
+enable_testing()
+
+# Zero-dependency test executable — tests the protocol/dispatch logic that
+# doesn't require wxWidgets, Asio networking, or OS-specific input injection.
+# Uses a built-in minimal test framework (no external dependencies needed).
+add_executable(pocket_pad_tests
+    tests/test_protocol_and_dispatch.cpp
+)
+
+target_include_directories(pocket_pad_tests PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+)
+
+# Register with CTest
+add_test(NAME pocket_pad_tests COMMAND pocket_pad_tests)
