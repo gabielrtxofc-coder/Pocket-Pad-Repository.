@@ -18,38 +18,34 @@ if(WIN32)
     # Define Windows-specific libraries (added user32 for SendInput)
     set(PLATFORM_LIBS ws2_32 wsock32 user32)
     
+    # Platform-specific input manager source
+    set(PLATFORM_INPUT_SRC "src/input/win32/windowsinputmanager.cpp")
+    
     # MSVC vs MinGW resource handling
     if(MSVC)
-        set(PLATFORM_SRC "src/input/win32/windowsinputmanager.cpp" resource.rc)
+        set(PLATFORM_EXTRA_SRC resource.rc)
     else()
-        set(PLATFORM_SRC "src/input/win32/windowsinputmanager.cpp" resource.o)
+        set(PLATFORM_EXTRA_SRC resource.o)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,-subsystem,windows")
     endif()
 else()
     # Linux: Use system-installed wxWidgets
     find_package(wxWidgets REQUIRED net gl core base adv)
-    set(PLATFORM_SRC "src/input/linux/linuxinputmanager.cpp")
+    set(PLATFORM_INPUT_SRC "src/input/linux/linuxinputmanager.cpp")
     set(PLATFORM_LIBS "")
+    set(PLATFORM_EXTRA_SRC "")
     
     # Manual ASIO path for Linux
     set(ASIO_INCLUDE_DIR "${ASIO_PATH}/include") 
 endif()
 
 # Collect all sources but avoid double-including input managers
-file(GLOB_RECURSE ALL_SRC src/*.cpp)
+file(GLOB_RECURSE ALL_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
-if(WIN32)
-    set(PLATFORM_SRC "src/input/win32/windowsinputmanager.cpp")
-else()
-    set(PLATFORM_SRC "src/input/linux/linuxinputmanager.cpp")
-    set(PLATFORM_LIBS "")
-endif()
+# Remove the platform-specific input manager from the glob (it's added separately)
+list(REMOVE_ITEM ALL_SRC ${CMAKE_CURRENT_SOURCE_DIR}/${PLATFORM_INPUT_SRC})
 
-list(REMOVE_ITEM ALL_SRC ${PLATFORM_SRC})
-
-add_executable(Mousedroid WIN32 ${ALL_SRC} ${PLATFORM_SRC})
-
-
+add_executable(Mousedroid WIN32 ${ALL_SRC} ${PLATFORM_INPUT_SRC} ${PLATFORM_EXTRA_SRC})
 
 if(wxWidgets_FOUND)
     include(${wxWidgets_USE_FILE})
