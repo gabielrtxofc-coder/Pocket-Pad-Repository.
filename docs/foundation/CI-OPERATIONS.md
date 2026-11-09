@@ -290,6 +290,34 @@ dependências do aplicativo.
 
 (Atualizado após cada execução relevante.)
 
-| Data | Tipo | Run ID | Commit | Resultado |
+| Data | Tipo | Run | Commit | Resultado |
 |---|---|---|---|---|
-| _a ser preenchido após a execução da Missão 03.1_ | — | — | — | — |
+| 2026-11-09 | `workflow_dispatch` (branch de trabalho) | [#7 / 42551971029](https://github.com/gabielrtxofc-coder/Pocket-Pad-Repository./actions/runs/42551971029) | `f315942` | **sucesso** — 4/4 jobs |
+| 2026-11-08 | `push` (branch antiga, antes da correção) | [#6 / 42524050240](https://github.com/gabielrtxofc-coder/Pocket-Pad-Repository./actions/runs/42524050240) | `a434774` | sucesso — 4/4 jobs |
+
+### Detalhe da execução da Missão 03.1 (run 42551971029)
+
+| Job | Status | Tempo |
+|---|---|---|
+| `android` | `completed` / `success` | — |
+| `android-instrumented` | `completed` / `success` | 4m 1s |
+| `server-linux` | `completed` / `success` | — |
+| `server-windows` | `completed` / `success` | 13m 57s |
+
+Testes comprovados: unidade Android `tests=1, failures=0, errors=0, skipped=0`;
+instrumentado Android `tests=1, failures=0, errors=0, skipped=0`.
+
+Artefatos publicados:
+
+| Artefato | Tamanho |
+|---|---|
+| `mousedroid-debug-apk` | 4 863 488 bytes |
+| `mousedroid-linux-server` | 163 233 bytes |
+| `mousedroid-windows-server` | 108 397 bytes |
+| `android-test-reports` | 5 826 bytes |
+| `android-instrumented-test-reports` | 5 214 bytes |
+| `windows-compile-log` | 2 306 bytes |
+
+Observações (warnings não bloqueantes): ações `actions/*@v4` e `setup-java@v4`
+sob Node.js 20/48 deprecados; `setup-java@v4` deprecado. Eram as versões
+validadas na Missão 02 e **não** foram alteradas nesta missão.
