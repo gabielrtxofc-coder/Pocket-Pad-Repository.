@@ -1,4 +1,60 @@
-build
-app/build
-app/release
-.gradle
+# ══════════════════════════════════════════════════════════════════════════════
+# Pocket Pad — cliente Android (Gradle project root)
+#
+# Este arquivo NÃO repete os padrões da raiz; ele existe porque o projeto
+# Android pode ser aberto diretamente em `client/` como raiz do workspace, e
+# nesse caso o `.gitignore` da raiz fica fora do escopo do repositório.
+#
+# Regra: ignora o que é GERADO ou LOCAL; preserva o que é VERSIONADO.
+# Nenhum padrão aqui casa um arquivo rastreado (verificado com
+# `git check-ignore -v` contra os arquivos versionados).
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── Saída de build ───────────────────────────────────────────────────────────
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+
+# ── Gradle ───────────────────────────────────────────────────────────────────
+.gradle/
+local.properties
+
+# ── Android Studio / IntelliJ ────────────────────────────────────────────────
+# `.idea/` é ignorado como diretório; os 11 arquivos de configuração de projeto
+# são reabertos por exceção (git não permite "des-ignorar" um arquivo dentro de
+# um diretório ignorado sem reabrir o caminho completo).
+.idea/
+!.idea/.gitignore
+!.idea/.name
+!.idea/AndroidProjectSystem.xml
+!.idea/compiler.xml
+!.idea/gradle.xml
+!.idea/kotlinc.xml
+!.idea/migrations.xml
+!.idea/misc.xml
+!.idea/navEditor.xml
+!.idea/runConfigurations.xml
+!.idea/vcs.xml
+
+# Metadados de IDE explicitamente fora de controle de versão
+.idea/caches/
+.idea/shelf/
+.idea/workspace.xml
+.idea/assetWizardSettings.xml
+.idea/deploymentTargetDropDown.xml
+.idea/deploymentTargetSelector.xml
+*.iml
+
+# ── Assinatura ───────────────────────────────────────────────────────────────
+*.jks
+*.keystore
+keystore.properties
+
+# ── Sistema operacional e editores ───────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*~
