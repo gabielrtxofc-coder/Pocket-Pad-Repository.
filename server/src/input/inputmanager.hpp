@@ -10,3 +10,4 @@
  */
 
 #include "input/protocol.h"
+#include "logger.h"

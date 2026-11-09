@@ -68,16 +68,16 @@ endif()
 target_include_directories(Mousedroid PRIVATE ./src)
 
 # ===========================================================================
-# Test infrastructure (temporarily disabled for debugging)
+# Test infrastructure
 # ===========================================================================
-# enable_testing()
-# 
-# add_executable(pocket_pad_tests
-#     tests/test_protocol_and_dispatch.cpp
-# )
-# 
-# target_include_directories(pocket_pad_tests PRIVATE
-#     ${CMAKE_SOURCE_DIR}/src
-# )
-# 
-# add_test(NAME pocket_pad_tests COMMAND pocket_pad_tests)
+enable_testing()
+
+add_executable(pocket_pad_tests
+    tests/test_protocol_and_dispatch.cpp
+)
+
+target_include_directories(pocket_pad_tests PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+)
+
+add_test(NAME pocket_pad_tests COMMAND pocket_pad_tests)
