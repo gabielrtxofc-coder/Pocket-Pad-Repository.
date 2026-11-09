@@ -1,8 +1,8 @@
 #include "wxmain.h"
-#include "net/server.h"
 
 #ifdef _WIN32
 #include "adb.hpp"
+#include "net/server.h"
 #endif
 
 #include "../res/icon.xpm"
