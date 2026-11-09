@@ -1,14 +1,28 @@
 name: Foundation build validation
 
+# Gatilhos definitivos (Missão 03.1):
+#  - push na main ................ executa o CI
+#  - pull_request -> main ........ executa o CI (aberto, atualizado, reaberto)
+#  - workflow_dispatch ........... execução manual sob demanda
+# A missão anterior havia fixado o gatilho de push em uma branch de sessão do
+# Arena (arena/39232774-pocket-pad-repository), desligando o CI na prática.
+# Não usamos filtros de paths: qualquer alteração (incluindo a documentação e
+# o próprio workflow) deve ser validada, e um filtro estrito poderia excluir
+# por acidente arquivos importantes da compilação.
 on:
   push:
     branches:
-      - arena/39232774-pocket-pad-repository
-    paths:
-      - '.github/workflows/foundation-build.yml'
-      - 'client/**'
-      - 'server/**'
+      - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
+
+# Evita cancelar uma execução que já está em curso quando chega um push mais
+# recente ao mesmo branch: uma validação em andamento não deve ser invalidada.
+concurrency:
+  group: foundation-build-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: read
